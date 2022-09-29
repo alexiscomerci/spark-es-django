@@ -1,0 +1,42 @@
+version: "3"
+name: spark-compose
+services:
+  spark:
+    container_name: spark
+    image: "acomerci/spark:1.0.0"
+    volumes:
+      - ./spark/home:/home
+    # command para que no se cierre la instancia
+    command: tail -F anything
+  django:
+    container_name: django
+    image: "acomerci/django:1.0.0"
+    volumes:
+      - ./django/home:/home
+    ports:
+      - 8000:8000
+    # command para que no se cierre la instancia
+    command: tail -F anything
+  elasticsearch:
+    container_name: elasticsearch
+    image: "acomerci/elasticsearch:1.0.0"
+    environment:
+      - DISCOVERY.TYPE=single-node
+      - XPACK.SECURITY.ENABLED=false
+      - ELASTIC_CONTAINER=true
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - 9200:9200
+      - 9300:9300
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 2g
+    cap_add:
+      - IPC_LOCK
